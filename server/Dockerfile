@@ -1,20 +1,23 @@
-# Servir la imgen del backend con mvn
-FROM maven:3.9.9-eclipse-temurin-21
+# ---------------------------------------------------
+# ETAPA 1 — Build con Maven + Java 21
+# ---------------------------------------------------
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-#Establecer un directorio de trabajo
 WORKDIR /app
 
-#Copia todos los files del proyecto en el dir de trabajo
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
 COPY . .
+RUN mvn clean package -DskipTests && cp target/*.jar app.jar
 
-#Ejecutar 2 comandos:
-# 1- Limpiar y compilar el jar del back
+# ---------------------------------------------------
+# ETAPA 2 — Imagen final con JRE
+# ---------------------------------------------------
+FROM eclipse-temurin:21-jre
+WORKDIR /app
 
-# 2.- Copiar el jar resultante al dir de trabajo
-RUN mvn clean package -DskipTests && cp /target/*.jar app.jar
+COPY --from=build /app/app.jar app.jar
 
-#EXPONER LA IMAGEN
-EXPOSE 8081
-
-#Ejecutar el comando para servir el jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]

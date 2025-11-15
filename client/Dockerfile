@@ -1,36 +1,38 @@
-#Etapa 1 (build): compilación de recursos
+# ---------------------------------------------------
+# ETAPA 1 — Build de React
+# ---------------------------------------------------
 FROM node:20 AS build
 
 WORKDIR /app
 
-#package-lock.json, package.json -> /app
-COPY package*.json
+# Copiar package.json y lock
+COPY package*.json ./
 
-#Funciona para generar node_modules
+# Instalar dependencias
 RUN npm install
 
-# /client/* -> /app/*
+# Copiar el código
 COPY . .
 
-#TRAER ESOS ARGS (LLEGAN DEL COMPOSE)
+# ARG del compose
 ARG API_HOST
-ARG API_BASE
 ARG API_PORT
+ARG API_BASE
 
-#ESTABLECER LAS VARIABLES DE ENTORNO EN BASE A LOS ARGS (VAN AL .env)
-ENV VITE_API_HOST=$API_HOST
-ENV VITE_API_BASE=$API_BASE
-ENV VITE_API_PORT=$API_PORT
-# Funciona para generar el /dist
+# Variables de entorno que Vite lee
+ENV VITE_API_HOST=http://${API_HOST}
+ENV VITE_API_PORT=${API_PORT}
+ENV VITE_API_BASE=${API_BASE}
+
+# Construir el proyecto
 RUN npm run build
 
-#Etapa 2: Construcción de imagen
-
+# ---------------------------------------------------
+# ETAPA 2 — Servir con Nginx
+# ---------------------------------------------------
 FROM nginx:alpine
 
-#Servir todos los recursos generados en la etapa anterior en la imagen.
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
-
-CDM ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class TestController {
     @GetMapping("")
     public ResponseEntity<?> getMessage() {
-        HashMap<String, Object> response = new HashMap<>();
+        HashMap<String, Object> response = new HashMap <>();
         response.put("data", "OK");
         response.put("message", "API FUNCIONANDO......");
 

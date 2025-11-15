@@ -1,18 +1,18 @@
-const TestController = {};
-const ENV = import.meta.env;
+const API = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}${import.meta.env.VITE_API_BASE}`;
 
-const API_URL = `http://${ENV.API_HOST}:${ENV.API_PORT}${ENV.API_BASE}/test`;
+const TestController = {
 
-TestController.callToAPI = async () => {
-    await fetch(`${API_URL}/test`), {
-        method: 'GET',
-        headers: {
-            "Accept": "application/json"
-        }
-    }.then(response => response,json()).then(result =>{
-        console.log(result);
+  callToAPI: async () => {
+    try {
+      const res = await fetch(`${API}/test`);
+      const data = await res.json();
+      console.log("DATA:", data);
+      alert("API respondió correctamente. Revisa consola.");
+    } catch (e) {
+      console.error("Error en la petición:", e);
+    }
+  }
 
-    }).catch(console.log);
-}
+};
 
 export default TestController;
